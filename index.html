@@ -1,0 +1,2410 @@
+<!DOCTYPE html>
+
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PLUG</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+
+/* ══════════════════════════════════════
+RESET & BASE
+══════════════════════════════════════ */
+*, *::before, *::after {
+margin: 0; padding: 0;
+box-sizing: border-box;
+-webkit-tap-highlight-color: transparent;
+}
+
+:root {
+–black: #080808;
+–white: #f0ede6;
+–acid: #d4ff00;
+–orange: #ff4d1c;
+–dim: #141414;
+–card: #111111;
+–border: #1f1f1f;
+–muted: #555555;
+–green: #00e676;
+–nav-h: 72px;
+}
+
+html, body {
+width: 100%;
+height: 100%;
+overflow: hidden;
+background: #080808 !important;
+font-family: ‘DM Sans’, sans-serif;
+color: #f0ede6;
+-webkit-font-smoothing: antialiased;
+}
+
+#app {
+width: 100%;
+height: 100%;
+position: relative;
+overflow: hidden;
+background: #080808;
+min-height: 100vh;
+}
+
+/* ══════════════════════════════════════
+SCREENS
+══════════════════════════════════════ */
+.screen {
+position: absolute;
+inset: 0;
+display: flex;
+flex-direction: column;
+overflow: hidden;
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.3s ease;
+}
+.screen.active {
+opacity: 1;
+pointer-events: all;
+}
+.screen-body {
+flex: 1;
+overflow-y: auto;
+overflow-x: hidden;
+-webkit-overflow-scrolling: touch;
+padding-bottom: var(–nav-h);
+}
+/* screens without bottom nav */
+.screen.no-nav .screen-body {
+padding-bottom: 0;
+}
+
+/* ══════════════════════════════════════
+TOP BAR
+══════════════════════════════════════ */
+.topbar {
+display: flex;
+align-items: center;
+justify-content: space-between;
+padding: 16px 24px 8px;
+flex-shrink: 0;
+}
+.topbar-logo {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 32px;
+letter-spacing: 2px;
+color: var(–white);
+cursor: pointer;
+line-height: 1;
+}
+.topbar-logo span { color: var(–acid); }
+.topbar-right {
+font-size: 12px;
+color: var(–muted);
+font-family: ‘DM Mono’, monospace;
+text-transform: uppercase;
+letter-spacing: 1px;
+cursor: pointer;
+}
+
+/* ══════════════════════════════════════
+BOTTOM NAV
+══════════════════════════════════════ */
+.bottom-nav {
+position: fixed;
+bottom: 0; left: 0; right: 0;
+height: var(–nav-h);
+background: rgba(8,8,8,0.97);
+border-top: 1px solid var(–border);
+display: flex;
+align-items: center;
+justify-content: space-around;
+padding-bottom: env(safe-area-inset-bottom, 0px);
+z-index: 100;
+backdrop-filter: blur(20px);
+-webkit-backdrop-filter: blur(20px);
+}
+.nav-item {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 4px;
+cursor: pointer;
+padding: 8px 20px;
+position: relative;
+}
+.nav-icon { font-size: 22px; }
+.nav-label {
+font-size: 9px;
+color: var(–muted);
+font-family: ‘DM Mono’, monospace;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+.nav-item.active .nav-label { color: var(–acid); }
+.nav-item.active .nav-icon { filter: drop-shadow(0 0 6px var(–acid)); }
+.nav-badge {
+position: absolute;
+top: 6px; right: 14px;
+width: 8px; height: 8px;
+background: var(–orange);
+border-radius: 50%;
+}
+
+/* ══════════════════════════════════════
+HOME SCREEN
+══════════════════════════════════════ */
+.home-header {
+padding: 8px 24px 0;
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+}
+.home-logo {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 52px;
+letter-spacing: 3px;
+line-height: 1;
+}
+.home-logo span { color: var(–acid); }
+.home-greeting {
+font-size: 11px;
+color: var(–muted);
+font-family: ‘DM Mono’, monospace;
+text-transform: uppercase;
+letter-spacing: 1px;
+text-align: right;
+padding-top: 10px;
+line-height: 1.6;
+}
+.home-tagline {
+padding: 20px 24px 0;
+font-size: 12px;
+color: #333;
+font-family: ‘DM Mono’, monospace;
+text-transform: uppercase;
+letter-spacing: 2px;
+}
+
+/* MODULES GRID */
+.modules-grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 10px;
+padding: 16px 24px 0;
+}
+.module-item {
+background: var(–dim);
+border: 1px solid var(–border);
+border-radius: 18px;
+padding: 18px;
+cursor: pointer;
+transition: transform 0.15s, background 0.15s;
+position: relative;
+overflow: hidden;
+}
+.module-item::after {
+content: ‘’;
+position: absolute;
+inset: 0;
+background: linear-gradient(135deg, transparent 60%, rgba(212,255,0,0.03));
+}
+.module-item:active { transform: scale(0.97); background: #1a1a1a; }
+.module-emoji { font-size: 26px; margin-bottom: 12px; display: block; }
+.module-tag {
+font-size: 10px;
+color: var(–muted);
+text-transform: uppercase;
+letter-spacing: 1px;
+font-family: ‘DM Mono’, monospace;
+}
+.module-name {
+font-size: 15px;
+color: var(–white);
+font-weight: 600;
+margin-top: 2px;
+}
+
+/* CENTRAL PLUG BUTTON */
+.central-zone {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 14px;
+padding: 28px 0 16px;
+}
+.central-hint {
+font-size: 11px;
+color: #2a2a2a;
+font-family: ‘DM Mono’, monospace;
+text-transform: uppercase;
+letter-spacing: 2px;
+}
+.central-btn-wrap {
+position: relative;
+width: 120px;
+height: 120px;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+.central-ring {
+position: absolute;
+border-radius: 50%;
+border: 1px solid rgba(212,255,0,0.15);
+animation: ring-pulse 2.5s ease-in-out infinite;
+}
+.central-ring-1 { width: 120px; height: 120px; animation-delay: 0s; }
+.central-ring-2 { width: 140px; height: 140px; animation-delay: 0.4s; border-color: rgba(212,255,0,0.07); }
+@keyframes ring-pulse {
+0%,100% { opacity: 1; transform: scale(1); }
+50% { opacity: 0.3; transform: scale(1.04); }
+}
+.central-btn {
+width: 90px;
+height: 90px;
+border-radius: 50%;
+background: var(–acid);
+border: none;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 36px;
+position: relative;
+z-index: 2;
+box-shadow: 0 0 40px rgba(212,255,0,0.35);
+transition: transform 0.15s, box-shadow 0.15s;
+}
+.central-btn:active { transform: scale(0.93); box-shadow: 0 0 20px rgba(212,255,0,0.2); }
+.central-label {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 12px;
+color: rgba(212,255,0,0.3);
+letter-spacing: 5px;
+}
+
+/* RECENT */
+.section-title {
+font-size: 10px;
+color: var(–muted);
+text-transform: uppercase;
+letter-spacing: 2px;
+font-family: ‘DM Mono’, monospace;
+padding: 0 24px 10px;
+}
+.recent-list { padding: 0 24px; }
+.recent-item {
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 12px 0;
+border-bottom: 1px solid var(–border);
+cursor: pointer;
+}
+.recent-dot { width: 7px; height: 7px; border-radius: 50%; background: var(–acid); flex-shrink: 0; }
+.recent-dot.dim { background: #333; }
+.recent-text { font-size: 13px; color: #555; flex: 1; }
+.recent-time { font-size: 11px; color: #2a2a2a; font-family: ‘DM Mono’, monospace; }
+
+/* ══════════════════════════════════════
+LISTENING SCREEN
+══════════════════════════════════════ */
+#screen-listening {
+background: var(–black);
+align-items: center;
+justify-content: center;
+}
+.listen-content {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 32px;
+padding: 0 40px;
+}
+.waveform {
+display: flex;
+align-items: center;
+gap: 5px;
+height: 70px;
+}
+.wave-bar {
+width: 4px;
+background: var(–acid);
+border-radius: 4px;
+animation: wave 0.8s ease-in-out infinite;
+}
+.wave-bar:nth-child(1){animation-delay:0s;height:10px}
+.wave-bar:nth-child(2){animation-delay:0.1s;height:10px}
+.wave-bar:nth-child(3){animation-delay:0.2s;height:10px}
+.wave-bar:nth-child(4){animation-delay:0.3s;height:10px}
+.wave-bar:nth-child(5){animation-delay:0.4s;height:10px}
+.wave-bar:nth-child(6){animation-delay:0.3s;height:10px}
+.wave-bar:nth-child(7){animation-delay:0.2s;height:10px}
+.wave-bar:nth-child(8){animation-delay:0.1s;height:10px}
+.wave-bar:nth-child(9){animation-delay:0s;height:10px}
+@keyframes wave {
+0%,100% { height: 8px; opacity: 0.3; }
+50% { height: 56px; opacity: 1; }
+}
+.listen-label {
+font-size: 13px;
+color: var(–muted);
+font-family: ‘DM Mono’, monospace;
+text-transform: uppercase;
+letter-spacing: 2px;
+}
+.transcript-box {
+min-height: 60px;
+text-align: center;
+}
+.transcript-text {
+font-size: 22px;
+color: var(–white);
+font-weight: 500;
+line-height: 1.4;
+opacity: 0;
+transition: opacity 0.4s;
+}
+.transcript-text.show { opacity: 1; }
+.listen-cancel {
+font-size: 13px;
+color: var(–muted);
+font-family: ‘DM Mono’, monospace;
+text-transform: uppercase;
+letter-spacing: 1px;
+cursor: pointer;
+padding: 10px 20px;
+border: 1px solid var(–border);
+border-radius: 20px;
+}
+
+/* ══════════════════════════════════════
+PROCESSING SCREEN
+══════════════════════════════════════ */
+#screen-processing {
+background: var(–black);
+align-items: center;
+justify-content: center;
+}
+.process-content {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 48px;
+width: 100%;
+padding: 0 40px;
+}
+.process-orb {
+width: 110px;
+height: 110px;
+border-radius: 50%;
+background: radial-gradient(circle at 35% 35%, #d4ff00, #7aad00);
+animation: orb 1.5s ease-in-out infinite;
+position: relative;
+}
+.process-orb::after {
+content: ‘’;
+position: absolute;
+inset: -14px;
+border-radius: 50%;
+border: 1px solid rgba(212,255,0,0.15);
+animation: orb-ring 1.5s ease-in-out infinite;
+}
+@keyframes orb { 0%,100%{transform:scale(1);box-shadow:0 0 40px rgba(212,255,0,0.3)} 50%{transform:scale(1.06);box-shadow:0 0 70px rgba(212,255,0,0.5)} }
+@keyframes orb-ring { 0%,100%{transform:scale(1);opacity:0.5} 50%{transform:scale(1.3);opacity:0} }
+.process-steps { width: 100%; }
+.p-step {
+display: flex;
+align-items: center;
+gap: 14px;
+padding: 10px 0;
+opacity: 0;
+transform: translateY(8px);
+transition: opacity 0.4s, transform 0.4s;
+}
+.p-step.done { opacity: 1; transform: translateY(0); }
+.p-dot {
+width: 8px; height: 8px;
+border-radius: 50%;
+background: #222;
+flex-shrink: 0;
+transition: background 0.3s;
+}
+.p-step.done .p-dot { background: var(–acid); }
+.p-text {
+font-size: 13px;
+color: #333;
+font-family: ‘DM Mono’, monospace;
+transition: color 0.3s;
+}
+.p-step.done .p-text { color: var(–white); }
+
+/* ══════════════════════════════════════
+CARD SCREEN
+══════════════════════════════════════ */
+#screen-card {
+background: var(–black);
+}
+.card-screen-body {
+flex: 1;
+overflow-y: auto;
+-webkit-overflow-scrolling: touch;
+padding: 0 0 16px;
+}
+.plug-msg {
+margin: 0 20px 16px;
+background: var(–dim);
+border: 1px solid var(–border);
+border-radius: 16px;
+padding: 14px 16px;
+display: flex;
+align-items: flex-start;
+gap: 10px;
+}
+.plug-msg-avatar {
+width: 30px; height: 30px;
+border-radius: 50%;
+background: var(–acid);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 15px;
+flex-shrink: 0;
+}
+.plug-msg-text { font-size: 14px; color: var(–white); line-height: 1.4; }
+
+/* PRODUCT CARD */
+.product-card {
+margin: 0 20px;
+background: var(–card);
+border: 1px solid #1e1e1e;
+border-radius: 22px;
+overflow: hidden;
+cursor: grab;
+user-select: none;
+-webkit-user-select: none;
+}
+.card-img-zone {
+height: 200px;
+background: #111;
+position: relative;
+display: flex;
+align-items: center;
+justify-content: center;
+overflow: hidden;
+}
+.card-img-zone.bg-transport { background: linear-gradient(135deg, #000a1a, #001525); }
+.card-img-zone.bg-food { background: linear-gradient(135deg, #1a0f00, #2a1500); }
+.card-img-zone.bg-agenda { background: linear-gradient(135deg, #0a0a1a, #0d0d2a); }
+.card-source-badge {
+position: absolute;
+top: 12px; left: 12px;
+background: rgba(0,0,0,0.75);
+border: 1px solid #2a2a2a;
+border-radius: 10px;
+padding: 5px 10px;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+.source-dot { width: 7px; height: 7px; border-radius: 50%; background: var(–acid); }
+.source-name { font-size: 11px; color: var(–white); font-family: ‘DM Mono’, monospace; }
+.discount-badge {
+position: absolute;
+top: 12px; right: 12px;
+background: var(–orange);
+color: #fff;
+font-size: 11px;
+font-weight: 700;
+font-family: ‘DM Mono’, monospace;
+padding: 4px 10px;
+border-radius: 20px;
+}
+.card-info-zone { padding: 18px 20px 20px; }
+.card-product-name { font-size: 22px; color: var(–white); font-weight: 700; margin-bottom: 4px; }
+.card-product-sub {
+font-size: 12px;
+color: var(–muted);
+font-family: ‘DM Mono’, monospace;
+text-transform: uppercase;
+letter-spacing: 1px;
+margin-bottom: 16px;
+}
+.card-bottom { display: flex; justify-content: space-between; align-items: flex-end; }
+.price-old { font-size: 13px; color: #444; text-decoration: line-through; font-family: ‘DM Mono’, monospace; }
+.price-main { font-size: 34px; color: var(–acid); font-family: ‘Bebas Neue’, sans-serif; line-height: 1; }
+.card-score { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; }
+.score-val { font-size: 14px; }
+.score-lbl { font-size: 11px; color: var(–muted); font-family: ‘DM Mono’, monospace; }
+
+/* SWIPE TRACK */
+.swipe-zone {
+margin: 14px 20px 0;
+}
+.swipe-track {
+width: 100%;
+height: 62px;
+background: var(–dim);
+border: 1px solid var(–border);
+border-radius: 31px;
+position: relative;
+overflow: hidden;
+touch-action: none;
+}
+.swipe-fill {
+position: absolute;
+left: 0; top: 0; bottom: 0;
+width: 0%;
+background: linear-gradient(90deg, rgba(212,255,0,0.08), rgba(212,255,0,0.03));
+border-radius: 31px;
+pointer-events: none;
+}
+.swipe-track-label {
+position: absolute;
+inset: 0;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 12px;
+color: #333;
+font-family: ‘DM Mono’, monospace;
+text-transform: uppercase;
+letter-spacing: 2px;
+pointer-events: none;
+}
+.swipe-thumb {
+position: absolute;
+left: 7px; top: 7px;
+width: 48px; height: 48px;
+border-radius: 50%;
+background: var(–acid);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 20px;
+cursor: grab;
+touch-action: none;
+user-select: none;
+-webkit-user-select: none;
+will-change: left;
+z-index: 2;
+}
+.swipe-hint {
+text-align: center;
+margin-top: 8px;
+font-size: 10px;
+color: #2a2a2a;
+font-family: ‘DM Mono’, monospace;
+text-transform: uppercase;
+letter-spacing: 1.5px;
+}
+
+/* SWIPED ANIMATION */
+@keyframes swipe-out {
+to { transform: translateX(130%) rotate(15deg); opacity: 0; }
+}
+.product-card.swiped { animation: swipe-out 0.4s ease forwards; }
+
+/* ══════════════════════════════════════
+CONFIRMED SCREEN
+══════════════════════════════════════ */
+#screen-confirmed {
+background: var(–black);
+align-items: center;
+justify-content: center;
+}
+.confirm-content {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 20px;
+padding: 0 24px;
+width: 100%;
+}
+.confirm-circle {
+width: 96px; height: 96px;
+border-radius: 50%;
+border: 2px solid var(–acid);
+display: flex;
+align-items: center;
+justify-content: center;
+animation: pop 0.5s ease;
+}
+@keyframes pop { from{transform:scale(0.4);opacity:0} to{transform:scale(1);opacity:1} }
+.confirm-check { font-size: 40px; animation: pop 0.4s ease 0.15s both; }
+.confirm-title {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 48px;
+letter-spacing: 3px;
+text-align: center;
+}
+.confirm-sub {
+font-size: 13px;
+color: var(–muted);
+text-align: center;
+font-family: ‘DM Mono’, monospace;
+text-transform: uppercase;
+letter-spacing: 1px;
+line-height: 1.6;
+}
+.confirm-details {
+width: 100%;
+background: var(–dim);
+border: 1px solid var(–border);
+border-radius: 18px;
+overflow: hidden;
+}
+.confirm-row {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 13px 18px;
+border-bottom: 1px solid var(–border);
+}
+.confirm-row:last-child { border-bottom: none; }
+.confirm-key { font-size: 11px; color: var(–muted); font-family: ‘DM Mono’, monospace; text-transform: uppercase; letter-spacing: 1px; }
+.confirm-val { font-size: 13px; color: var(–white); font-weight: 600; }
+.confirm-val.acid { color: var(–acid); }
+.confirm-msg {
+width: 100%;
+background: var(–dim);
+border: 1px solid var(–border);
+border-radius: 16px;
+padding: 14px 16px;
+display: flex;
+align-items: flex-start;
+gap: 10px;
+}
+.confirm-new-btn {
+width: 100%;
+height: 54px;
+background: var(–acid);
+border: none;
+border-radius: 27px;
+font-family: ‘DM Sans’, sans-serif;
+font-size: 14px;
+font-weight: 700;
+color: #000;
+cursor: pointer;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+transition: transform 0.15s;
+}
+.confirm-new-btn:active { transform: scale(0.97); }
+
+/* ══════════════════════════════════════
+ORDERS SCREEN
+══════════════════════════════════════ */
+.page-hero { padding: 8px 24px 20px; }
+.page-hero-title {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 36px;
+letter-spacing: 2px;
+color: var(–white);
+}
+.page-hero-title span { color: var(–acid); }
+.orders-list {
+padding: 0 20px;
+display: flex;
+flex-direction: column;
+gap: 10px;
+}
+.order-card {
+background: var(–dim);
+border: 1px solid var(–border);
+border-radius: 16px;
+padding: 16px;
+display: flex;
+gap: 14px;
+align-items: center;
+}
+.order-icon {
+width: 50px; height: 50px;
+border-radius: 14px;
+background: var(–card);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 24px;
+flex-shrink: 0;
+}
+.order-info { flex: 1; min-width: 0; }
+.order-name { font-size: 14px; color: var(–white); font-weight: 600; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.order-meta { font-size: 11px; color: var(–muted); font-family: ‘DM Mono’, monospace; }
+.order-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+.order-price { font-size: 17px; color: var(–acid); font-family: ‘Bebas Neue’, sans-serif; }
+.order-status {
+font-size: 10px;
+font-family: ‘DM Mono’, monospace;
+padding: 3px 8px;
+border-radius: 10px;
+}
+.status-done { background: rgba(0,230,118,0.1); color: var(–green); }
+.status-transit { background: rgba(212,255,0,0.1); color: var(–acid); }
+.orders-empty {
+text-align: center;
+padding: 60px 24px;
+color: var(–muted);
+font-family: ‘DM Mono’, monospace;
+font-size: 13px;
+}
+
+/* ══════════════════════════════════════
+SETTINGS SCREEN
+══════════════════════════════════════ */
+.settings-group { padding: 0 20px 8px; }
+.settings-group-label {
+font-size: 10px;
+color: var(–muted);
+font-family: ‘DM Mono’, monospace;
+text-transform: uppercase;
+letter-spacing: 2px;
+padding: 14px 4px 8px;
+}
+.settings-row {
+background: var(–dim);
+border: 1px solid var(–border);
+border-radius: 14px;
+padding: 15px 16px;
+margin-bottom: 8px;
+display: flex;
+align-items: center;
+gap: 14px;
+cursor: pointer;
+transition: background 0.15s;
+}
+.settings-row:active { background: #1a1a1a; }
+.settings-row-icon {
+width: 38px; height: 38px;
+border-radius: 11px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 18px;
+flex-shrink: 0;
+}
+.settings-row-body { flex: 1; }
+.settings-row-label { font-size: 14px; color: var(–white); font-weight: 500; }
+.settings-row-sub { font-size: 12px; color: var(–muted); margin-top: 2px; }
+.settings-row-right { font-size: 12px; color: var(–muted); font-family: ‘DM Mono’, monospace; }
+.chevron { font-size: 18px; color: #333; }
+
+/* TOGGLE */
+.toggle {
+position: relative;
+width: 44px; height: 26px;
+flex-shrink: 0;
+}
+.toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-track {
+position: absolute;
+inset: 0;
+background: #2a2a2a;
+border-radius: 13px;
+cursor: pointer;
+transition: background 0.3s;
+}
+.toggle-thumb {
+position: absolute;
+width: 20px; height: 20px;
+left: 3px; top: 3px;
+background: #555;
+border-radius: 50%;
+transition: left 0.3s, background 0.3s;
+pointer-events: none;
+}
+.toggle input:checked ~ .toggle-track { background: var(–acid); }
+.toggle input:checked ~ .toggle-thumb { left: 21px; background: #000; }
+
+/* ══════════════════════════════════════
+PLUG CARD SCREEN
+══════════════════════════════════════ */
+.plugcard-wrap { padding: 0 20px 20px; }
+
+/* THE CARD ITSELF */
+.visa-card {
+width: 100%;
+height: 200px;
+border-radius: 20px;
+background: linear-gradient(135deg, #0a0a0a 0%, #141414 40%, #0d1800 100%);
+border: 1px solid #222;
+position: relative;
+overflow: hidden;
+box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(212,255,0,0.08);
+margin-bottom: 16px;
+}
+/* Grid pattern */
+.visa-card::before {
+content: ‘’;
+position: absolute;
+inset: 0;
+background-image: linear-gradient(rgba(212,255,0,0.025) 1px, transparent 1px), linear-gradient(90deg, rgba(212,255,0,0.025) 1px, transparent 1px);
+background-size: 28px 28px;
+}
+/* Shine */
+.visa-card::after {
+content: ‘’;
+position: absolute;
+inset: 0;
+background: linear-gradient(135deg, transparent 30%, rgba(212,255,0,0.02) 50%, transparent 70%);
+animation: card-shine 5s ease-in-out infinite;
+}
+@keyframes card-shine {
+0%,100%{opacity:0;transform:translateX(-100%)}
+50%{opacity:1;transform:translateX(100%)}
+}
+.visa-chip {
+position: absolute;
+top: 22px; left: 22px;
+width: 40px; height: 30px;
+background: linear-gradient(135deg, #c8a96e, #e8c87a, #b8984a);
+border-radius: 5px;
+z-index: 2;
+}
+.visa-chip::before {
+content: ‘’;
+position: absolute;
+top: 7px; left: 5px; right: 5px; bottom: 7px;
+border: 1px solid rgba(0,0,0,0.15);
+border-radius: 3px;
+}
+.visa-chip::after {
+content: ‘’;
+position: absolute;
+top: 50%; left: 0; right: 0;
+height: 1px;
+background: rgba(0,0,0,0.12);
+transform: translateY(-50%);
+}
+.visa-nfc {
+position: absolute;
+top: 22px; right: 22px;
+z-index: 2;
+font-size: 20px;
+opacity: 0.5;
+}
+.visa-reveal-btn {
+position: absolute;
+top: 50%; left: 50%;
+transform: translate(-50%, -50%);
+z-index: 3;
+display: flex;
+align-items: center;
+gap: 6px;
+background: rgba(0,0,0,0.6);
+border: 1px solid rgba(212,255,0,0.2);
+border-radius: 20px;
+padding: 6px 14px;
+cursor: pointer;
+color: var(–acid);
+font-size: 11px;
+font-family: ‘DM Mono’, monospace;
+letter-spacing: 1px;
+backdrop-filter: blur(4px);
+transition: background 0.2s;
+}
+.visa-reveal-btn:active { background: rgba(212,255,0,0.1); }
+.visa-number {
+position: absolute;
+bottom: 70px; left: 22px;
+font-family: ‘DM Mono’, monospace;
+font-size: 15px;
+color: rgba(255,255,255,0.65);
+letter-spacing: 3px;
+z-index: 2;
+}
+.visa-brand {
+position: absolute;
+bottom: 36px; left: 22px;
+z-index: 2;
+}
+.visa-brand-name {
+font-family: ‘Bebas Neue’, sans-serif;
+font-size: 24px;
+color: var(–white);
+letter-spacing: 3px;
+}
+.visa-brand-name span { color: var(–acid); }
+.visa-brand-tag {
+font-size: 8px;
+color: rgba(255,255,255,0.25);
+font-family: ‘DM Mono’, monospace;
+letter-spacing: 2px;
+text-transform: uppercase;
+margin-top: 1px;
+}
+.visa-holder {
+position: absolute;
+bottom: 16px; left: 22px;
+z-index: 2;
+}
+.visa-holder-label { font-size: 8px; color: rgba(255,255,255,0.25); font-family: ‘DM Mono’, monospace; letter-spacing: 2px; text-transform: uppercase; }
+.visa-holder-name { font-size: 13px; color: var(–white); font-family: ‘DM Mono’, monospace; margin-top: 1px; }
+.visa-expiry {
+position: absolute;
+bottom: 16px; right: 80px;
+z-index: 2;
+text-align: right;
+}
+.visa-expiry-label { font-size: 8px; color: rgba(255,255,255,0.25); font-family: ‘DM Mono’, monospace; letter-spacing: 2px; text-transform: uppercase; }
+.visa-expiry-val { font-size: 13px; color: var(–white); font-family: ‘DM Mono’, monospace; margin-top: 1px; }
+.visa-cvv {
+position: absolute;
+bottom: 16px; right: 22px;
+z-index: 2;
+text-align: right;
+}
+.visa-cvv-label { font-size: 8px; color: rgba(255,255,255,0.25); font-family: ‘DM Mono’, monospace; letter-spacing: 2px; text-transform: uppercase; }
+.visa-cvv-val { font-size: 13px; color: var(–white); font-family: ‘DM Mono’, monospace; margin-top: 1px; }
+.visa-accent {
+position: absolute;
+bottom: 0; left: 0; right: 0;
+height: 3px;
+background: linear-gradient(90deg, var(–acid), #7aad00, var(–acid));
+z-index: 3;
+}
+
+/* BALANCE */
+.balance-box {
+background: var(–dim);
+border: 1px solid var(–border);
+border-radius: 16px;
+padding: 18px 20px;
+margin-bottom: 12px;
+}
+.balance-lbl { font-size: 10px; color: var(–muted); font-family: ‘DM Mono’, monospace; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 6px; }
+.balance-val { font-family: ‘Bebas Neue’, sans-serif; font-size: 52px; color: var(–acid); letter-spacing: 2px; line-height: 1; }
+.balance-sub { font-size: 12px; color: var(–muted); margin-top: 4px; }
+.recharge-row { display: flex; gap: 10px; margin-bottom: 14px; }
+.recharge-btn {
+flex: 1;
+height: 46px;
+background: var(–dim);
+border: 1px solid var(–border);
+border-radius: 13px;
+color: var(–white);
+font-size: 14px;
+font-weight: 600;
+cursor: pointer;
+transition: all 0.15s;
+font-family: ‘DM Sans’, sans-serif;
+}
+.recharge-btn:active { background: var(–acid); color: #000; border-color: var(–acid); }
+
+/* CASHBACK */
+.cashback-box {
+background: var(–dim);
+border: 1px solid var(–border);
+border-radius: 16px;
+padding: 18px 20px;
+margin-bottom: 12px;
+}
+.cashback-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 16px;
+}
+.cashback-title { font-size: 15px; color: var(–white); font-weight: 600; }
+.cashback-active {
+background: rgba(212,255,0,0.1);
+color: var(–acid);
+font-size: 10px;
+font-family: ‘DM Mono’, monospace;
+padding: 3px 10px;
+border-radius: 10px;
+}
+.cashback-item {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 12px 0;
+border-bottom: 1px solid var(–border);
+}
+.cashback-item:last-child { border-bottom: none; }
+.cashback-left { display: flex; align-items: center; gap: 12px; }
+.cashback-emoji { font-size: 22px; }
+.cashback-name { font-size: 14px; color: var(–white); font-weight: 500; }
+.cashback-desc { font-size: 11px; color: var(–muted); margin-top: 1px; }
+.cashback-right { display: flex; align-items: center; gap: 12px; }
+.cashback-pct { font-size: 15px; color: var(–acid); font-weight: 700; }
+
+/* ══════════════════════════════════════
+PROFILE SCREEN
+══════════════════════════════════════ */
+.profile-hero {
+display: flex;
+flex-direction: column;
+align-items: center;
+gap: 10px;
+padding: 0 24px 24px;
+}
+.profile-avatar {
+width: 80px; height: 80px;
+border-radius: 50%;
+background: linear-gradient(135deg, var(–acid), #7aad00);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 34px;
+}
+.profile-name { font-family: ‘Bebas Neue’, sans-serif; font-size: 28px; letter-spacing: 2px; }
+.profile-email { font-size: 13px; color: var(–muted); font-family: ‘DM Mono’, monospace; }
+.profile-badge {
+background: rgba(212,255,0,0.1);
+color: var(–acid);
+font-size: 10px;
+font-family: ‘DM Mono’, monospace;
+padding: 4px 14px;
+border-radius: 12px;
+letter-spacing: 1px;
+}
+.form-wrap { padding: 0 20px; display: flex; flex-direction: column; gap: 10px; }
+.form-group {
+background: var(–dim);
+border: 1px solid var(–border);
+border-radius: 14px;
+padding: 14px 16px;
+}
+.form-lbl { font-size: 10px; color: var(–muted); font-family: ‘DM Mono’, monospace; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; }
+.form-input {
+width: 100%;
+background: transparent;
+border: none;
+outline: none;
+font-size: 15px;
+color: var(–white);
+font-family: ‘DM Sans’, sans-serif;
+}
+.form-input::placeholder { color: #2a2a2a; }
+.save-btn {
+margin: 16px 20px 0;
+width: calc(100% - 40px);
+height: 54px;
+background: var(–acid);
+border: none;
+border-radius: 27px;
+font-family: ‘DM Sans’, sans-serif;
+font-size: 14px;
+font-weight: 700;
+color: #000;
+cursor: pointer;
+text-transform: uppercase;
+transition: transform 0.15s;
+}
+.save-btn:active { transform: scale(0.97); }
+
+/* ══════════════════════════════════════
+ACTION MODAL
+══════════════════════════════════════ */
+.overlay {
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.8);
+z-index: 200;
+display: flex;
+align-items: flex-end;
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.3s;
+backdrop-filter: blur(6px);
+-webkit-backdrop-filter: blur(6px);
+}
+.overlay.show { opacity: 1; pointer-events: all; }
+.action-sheet {
+background: #0e0e0e;
+border-radius: 26px 26px 0 0;
+border-top: 1px solid #222;
+padding: 28px 20px 40px;
+width: 100%;
+}
+.sheet-title {
+font-size: 11px;
+color: var(–muted);
+font-family: ‘DM Mono’, monospace;
+text-transform: uppercase;
+letter-spacing: 2px;
+text-align: center;
+margin-bottom: 20px;
+}
+.text-input-row {
+display: none;
+gap: 10px;
+align-items: center;
+background: var(–dim);
+border: 1px solid var(–border);
+border-radius: 15px;
+padding: 14px 16px;
+margin-bottom: 12px;
+}
+.text-input-row.show { display: flex; }
+.text-input-field {
+flex: 1;
+background: transparent;
+border: none;
+outline: none;
+font-size: 15px;
+color: var(–white);
+font-family: ‘DM Sans’, sans-serif;
+}
+.text-input-field::placeholder { color: #333; }
+.text-send-btn {
+width: 40px; height: 40px;
+border-radius: 50%;
+background: var(–acid);
+border: none;
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 18px;
+flex-shrink: 0;
+transition: transform 0.15s;
+}
+.text-send-btn:active { transform: scale(0.9); }
+.action-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 14px; }
+.action-opt {
+display: flex;
+align-items: center;
+gap: 16px;
+background: var(–dim);
+border: 1px solid var(–border);
+border-radius: 18px;
+padding: 18px 18px;
+cursor: pointer;
+transition: background 0.15s;
+}
+.action-opt:active { background: #1a1a1a; }
+.action-opt-icon {
+width: 50px; height: 50px;
+border-radius: 14px;
+background: rgba(212,255,0,0.08);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 22px;
+flex-shrink: 0;
+}
+.action-opt-body { flex: 1; }
+.action-opt-title { font-size: 16px; color: var(–white); font-weight: 600; margin-bottom: 2px; }
+.action-opt-sub { font-size: 12px; color: var(–muted); font-family: ‘DM Mono’, monospace; }
+.action-opt-arrow { font-size: 20px; color: #333; }
+.sheet-cancel {
+text-align: center;
+padding: 14px;
+font-size: 13px;
+color: var(–muted);
+font-family: ‘DM Mono’, monospace;
+text-transform: uppercase;
+letter-spacing: 1px;
+cursor: pointer;
+}
+
+/* LANG MODAL */
+.lang-sheet { padding: 28px 20px 40px; }
+.lang-opt {
+padding: 16px;
+border-radius: 14px;
+text-align: center;
+cursor: pointer;
+font-size: 16px;
+color: var(–white);
+background: var(–dim);
+border: 1px solid var(–border);
+margin-bottom: 10px;
+transition: all 0.15s;
+}
+.lang-opt.selected { background: rgba(212,255,0,0.1); border-color: var(–acid); color: var(–acid); }
+.lang-opt:active { transform: scale(0.98); }
+
+/* ══════════════════════════════════════
+TOAST
+══════════════════════════════════════ */
+#toast {
+position: fixed;
+bottom: calc(var(–nav-h) + 16px);
+left: 20px; right: 20px;
+background: var(–white);
+color: #000;
+border-radius: 14px;
+padding: 14px 18px;
+font-size: 13px;
+font-weight: 600;
+z-index: 300;
+transform: translateY(20px);
+opacity: 0;
+transition: all 0.3s ease;
+pointer-events: none;
+}
+#toast.show { transform: translateY(0); opacity: 1; }
+
+/* ILLUSTRATION ANIMATIONS */
+@keyframes float { 0%,100%{transform:translateY(0) rotate(-5deg)} 50%{transform:translateY(-8px) rotate(-5deg)} }
+
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══════════════════ HOME ══════════════════ -->
+
+  <div class="screen active" id="screen-home">
+    <div class="screen-body" id="home-body">
+
+```
+  <div class="home-header">
+    <div class="home-logo">PL<span>U</span>G💡</div>
+    <div class="home-greeting" id="home-greeting">Prêt à<br>exécuter</div>
+  </div>
+
+  <div class="home-tagline" id="home-tagline">— Don't browse. Just plug.</div>
+
+  <div class="modules-grid">
+    <div class="module-item" onclick="startModule('shopping')">
+      <span class="module-emoji">👟</span>
+      <div class="module-tag" data-i18n="module">Module</div>
+      <div class="module-name" data-i18n="shopping">Shopping</div>
+    </div>
+    <div class="module-item" onclick="startModule('transport')">
+      <span class="module-emoji">🚗</span>
+      <div class="module-tag" data-i18n="module">Module</div>
+      <div class="module-name" data-i18n="transport">Transport</div>
+    </div>
+    <div class="module-item" onclick="startModule('food')">
+      <span class="module-emoji">🍔</span>
+      <div class="module-tag" data-i18n="module">Module</div>
+      <div class="module-name" data-i18n="food">Food</div>
+    </div>
+    <div class="module-item" onclick="startModule('agenda')">
+      <span class="module-emoji">📅</span>
+      <div class="module-tag" data-i18n="module">Module</div>
+      <div class="module-name" data-i18n="agenda">Agenda</div>
+    </div>
+  </div>
+
+  <div class="central-zone">
+    <div class="central-hint" id="central-hint" data-i18n="central-hint">Appuie pour agir</div>
+    <div class="central-btn-wrap">
+      <div class="central-ring central-ring-1"></div>
+      <div class="central-ring central-ring-2"></div>
+      <button class="central-btn" onclick="openActionModal()">⚡</button>
+    </div>
+    <div class="central-label">PLUG</div>
+  </div>
+
+  <div class="section-title" data-i18n="recent">Récent</div>
+  <div class="recent-list">
+    <div class="recent-item">
+      <div class="recent-dot"></div>
+      <div class="recent-text">Air Max noires — Taille 44</div>
+      <div class="recent-time">hier</div>
+    </div>
+    <div class="recent-item">
+      <div class="recent-dot dim"></div>
+      <div class="recent-text">Uber vers Opéra</div>
+      <div class="recent-time">lun.</div>
+    </div>
+  </div>
+
+</div>
+<nav class="bottom-nav">
+  <div class="nav-item active" onclick="goTo('home')">
+    <div class="nav-icon">⚡</div>
+    <div class="nav-label" data-i18n="action">Action</div>
+  </div>
+  <div class="nav-item" onclick="goTo('orders')" style="position:relative">
+    <div class="nav-icon">📦</div>
+    <div class="nav-label" data-i18n="orders">Orders</div>
+    <div class="nav-badge" id="orders-badge"></div>
+  </div>
+  <div class="nav-item" onclick="goTo('settings')">
+    <div class="nav-icon">⚙️</div>
+    <div class="nav-label" data-i18n="settings">Settings</div>
+  </div>
+</nav>
+```
+
+  </div>
+
+  <!-- ══════════════════ LISTENING ══════════════════ -->
+
+  <div class="screen no-nav" id="screen-listening">
+    <div class="topbar">
+      <div class="topbar-logo" onclick="goHome()">PL<span>U</span>G💡</div>
+      <div class="topbar-right" onclick="goHome()" data-i18n="cancel">Annuler</div>
+    </div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+      <div class="listen-content">
+        <div class="waveform">
+          <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+          <div class="wave-bar"></div><div class="wave-bar"></div><div class="wave-bar"></div>
+        </div>
+        <div class="listen-label" data-i18n="listening">J'écoute...</div>
+        <div class="transcript-box">
+          <div class="transcript-text" id="transcript-text"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ PROCESSING ══════════════════ -->
+
+  <div class="screen no-nav" id="screen-processing">
+    <div class="topbar">
+      <div class="topbar-logo" onclick="goHome()">PL<span>U</span>G💡</div>
+    </div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;">
+      <div class="process-content">
+        <div class="process-orb"></div>
+        <div class="process-steps">
+          <div class="p-step" id="ps1"><div class="p-dot"></div><div class="p-text" id="ps1t">Analyse...</div></div>
+          <div class="p-step" id="ps2"><div class="p-dot"></div><div class="p-text" id="ps2t">Scan...</div></div>
+          <div class="p-step" id="ps3"><div class="p-dot"></div><div class="p-text" id="ps3t">Vérification...</div></div>
+          <div class="p-step" id="ps4"><div class="p-dot"></div><div class="p-text" id="ps4t">Deal trouvé ✓</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ CARD ══════════════════ -->
+
+  <div class="screen no-nav" id="screen-card">
+    <div class="topbar">
+      <div class="topbar-logo" onclick="goHome()">PL<span>U</span>G💡</div>
+      <div class="topbar-right" onclick="goHome()">← <span data-i18n="back">Retour</span></div>
+    </div>
+    <div class="card-screen-body">
+      <div class="plug-msg">
+        <div class="plug-msg-avatar">⚡</div>
+        <div class="plug-msg-text" id="card-msg">Voilà ta pépite.</div>
+      </div>
+      <div class="product-card" id="product-card">
+        <div class="card-img-zone" id="card-img-zone">
+          <div id="card-illustration"></div>
+          <div class="card-source-badge">
+            <div class="source-dot"></div>
+            <div class="source-name" id="card-source">NIKE</div>
+          </div>
+          <div class="discount-badge" id="card-discount">-23%</div>
+        </div>
+        <div class="card-info-zone">
+          <div class="card-product-name" id="card-name">Air Max</div>
+          <div class="card-product-sub" id="card-sub">Noir · Taille 44 · En stock</div>
+          <div class="card-bottom">
+            <div>
+              <div class="price-old" id="card-old-price">129€</div>
+              <div class="price-main" id="card-price">99€</div>
+            </div>
+            <div class="card-score">
+              <div class="score-val">⭐ 4.8</div>
+              <div class="score-lbl" data-i18n="verified">Vendeur vérifié</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="swipe-zone">
+        <div class="swipe-track" id="swipe-track">
+          <div class="swipe-fill" id="swipe-fill"></div>
+          <div class="swipe-track-label" data-i18n="swipe-label">SWIPE POUR ACHETER →</div>
+          <div class="swipe-thumb" id="swipe-thumb">➜</div>
+        </div>
+        <div class="swipe-hint" data-i18n="swipe-hint">Glisse vers la droite pour valider</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ CONFIRMED ══════════════════ -->
+
+  <div class="screen no-nav" id="screen-confirmed">
+    <div class="topbar">
+      <div class="topbar-logo" onclick="goHome()">PL<span>U</span>G💡</div>
+    </div>
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;overflow-y:auto;">
+      <div class="confirm-content">
+        <div class="confirm-circle">
+          <div class="confirm-check">✓</div>
+        </div>
+        <div class="confirm-title" data-i18n="plugged">PLUGGÉ.</div>
+        <div class="confirm-sub" id="confirm-sub">Confirmation envoyée.</div>
+        <div class="confirm-details">
+          <div class="confirm-row">
+            <div class="confirm-key" data-i18n="product">Produit</div>
+            <div class="confirm-val" id="confirm-product">Air Max</div>
+          </div>
+          <div class="confirm-row">
+            <div class="confirm-key" data-i18n="source">Source</div>
+            <div class="confirm-val" id="confirm-source">Nike.com</div>
+          </div>
+          <div class="confirm-row">
+            <div class="confirm-key" data-i18n="total">Total</div>
+            <div class="confirm-val acid" id="confirm-price">99€</div>
+          </div>
+          <div class="confirm-row">
+            <div class="confirm-key" data-i18n="delivery">Livraison</div>
+            <div class="confirm-val">2-3 jours</div>
+          </div>
+          <div class="confirm-row">
+            <div class="confirm-key">Statut</div>
+            <div class="confirm-val acid">✓ <span data-i18n="ordered">Commandé</span></div>
+          </div>
+        </div>
+        <div class="confirm-msg">
+          <div class="plug-msg-avatar">⚡</div>
+          <div class="plug-msg-text" id="confirm-msg">C'est dans la boîte.</div>
+        </div>
+        <button class="confirm-new-btn" onclick="goHome()" data-i18n="new-action">Nouvelle action</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ ORDERS ══════════════════ -->
+
+  <div class="screen" id="screen-orders">
+    <div class="screen-body">
+      <div class="topbar">
+        <div class="topbar-logo" onclick="goHome()">PL<span>U</span>G💡</div>
+      </div>
+      <div class="page-hero">
+        <div class="page-hero-title" data-i18n="my-orders">Mes <span>commandes</span></div>
+      </div>
+      <div class="orders-list" id="orders-list">
+        <div class="order-card">
+          <div class="order-icon">👟</div>
+          <div class="order-info">
+            <div class="order-name">Air Max Noires 44</div>
+            <div class="order-meta">Nike.com · 14 mars 2026</div>
+          </div>
+          <div class="order-right">
+            <div class="order-price">99€</div>
+            <div class="order-status status-done" data-i18n="delivered">Livré</div>
+          </div>
+        </div>
+        <div class="order-card">
+          <div class="order-icon">🍔</div>
+          <div class="order-info">
+            <div class="order-name">Smash Burger x1</div>
+            <div class="order-meta">Deliveroo · 13 mars 2026</div>
+          </div>
+          <div class="order-right">
+            <div class="order-price">12€</div>
+            <div class="order-status status-done" data-i18n="delivered">Livré</div>
+          </div>
+        </div>
+        <div class="order-card">
+          <div class="order-icon">🚗</div>
+          <div class="order-info">
+            <div class="order-name">Uber X — Opéra</div>
+            <div class="order-meta">Uber · 12 mars 2026</div>
+          </div>
+          <div class="order-right">
+            <div class="order-price">14€</div>
+            <div class="order-status status-transit" data-i18n="in-transit">En route</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <nav class="bottom-nav">
+      <div class="nav-item" onclick="goTo('home')">
+        <div class="nav-icon">⚡</div>
+        <div class="nav-label" data-i18n="action">Action</div>
+      </div>
+      <div class="nav-item active" onclick="goTo('orders')">
+        <div class="nav-icon">📦</div>
+        <div class="nav-label" data-i18n="orders">Orders</div>
+      </div>
+      <div class="nav-item" onclick="goTo('settings')">
+        <div class="nav-icon">⚙️</div>
+        <div class="nav-label" data-i18n="settings">Settings</div>
+      </div>
+    </nav>
+  </div>
+
+  <!-- ══════════════════ SETTINGS ══════════════════ -->
+
+  <div class="screen" id="screen-settings">
+    <div class="screen-body">
+      <div class="topbar">
+        <div class="topbar-logo" onclick="goHome()">PL<span>U</span>G💡</div>
+      </div>
+      <div class="page-hero">
+        <div class="page-hero-title" data-i18n="settings-title">Para<span>mètres</span></div>
+      </div>
+
+```
+  <div class="settings-group">
+    <div class="settings-group-label" data-i18n="account">Compte</div>
+    <div class="settings-row" onclick="goTo('profile')">
+      <div class="settings-row-icon" style="background:rgba(212,255,0,0.08)">👤</div>
+      <div class="settings-row-body">
+        <div class="settings-row-label" data-i18n="profile">Profil</div>
+        <div class="settings-row-sub" id="profile-sub-label">Rayan Bennacer</div>
+      </div>
+      <div class="chevron">›</div>
+    </div>
+    <div class="settings-row" onclick="goTo('plugcard')">
+      <div class="settings-row-icon" style="background:rgba(212,255,0,0.08)">💳</div>
+      <div class="settings-row-body">
+        <div class="settings-row-label" data-i18n="plug-card">Carte PLUG</div>
+        <div class="settings-row-sub" id="card-balance-label">Solde : 150€</div>
+      </div>
+      <div class="chevron">›</div>
+    </div>
+  </div>
+
+  <div class="settings-group">
+    <div class="settings-group-label" data-i18n="preferences">Préférences</div>
+    <div class="settings-row" onclick="openLangModal()">
+      <div class="settings-row-icon" style="background:rgba(100,180,255,0.08)">🌍</div>
+      <div class="settings-row-body">
+        <div class="settings-row-label" data-i18n="language">Langue</div>
+        <div class="settings-row-sub" id="lang-sub">Français</div>
+      </div>
+      <div class="chevron">›</div>
+    </div>
+    <div class="settings-row">
+      <div class="settings-row-icon" style="background:rgba(255,200,0,0.08)">🔔</div>
+      <div class="settings-row-body">
+        <div class="settings-row-label" data-i18n="notifications">Notifications</div>
+        <div class="settings-row-sub" data-i18n="notif-sub">Commandes et promos</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="toggle-notif" checked onchange="onToggleNotif(this)">
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </label>
+    </div>
+    <div class="settings-row">
+      <div class="settings-row-icon" style="background:rgba(0,200,100,0.08)">📍</div>
+      <div class="settings-row-body">
+        <div class="settings-row-label" data-i18n="location">Localisation</div>
+        <div class="settings-row-sub" data-i18n="location-sub">Pour transport et food</div>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" id="toggle-loc" checked>
+        <div class="toggle-track"></div>
+        <div class="toggle-thumb"></div>
+      </label>
+    </div>
+  </div>
+
+  <div class="settings-group">
+    <div class="settings-group-label" data-i18n="about">À propos</div>
+    <div class="settings-row">
+      <div class="settings-row-icon" style="background:rgba(212,255,0,0.05)">⚡</div>
+      <div class="settings-row-body">
+        <div class="settings-row-label">PLUG</div>
+        <div class="settings-row-sub">Version 1.0.0 Beta · 2026</div>
+      </div>
+    </div>
+  </div>
+</div>
+<nav class="bottom-nav">
+  <div class="nav-item" onclick="goTo('home')">
+    <div class="nav-icon">⚡</div>
+    <div class="nav-label" data-i18n="action">Action</div>
+  </div>
+  <div class="nav-item" onclick="goTo('orders')">
+    <div class="nav-icon">📦</div>
+    <div class="nav-label" data-i18n="orders">Orders</div>
+  </div>
+  <div class="nav-item active" onclick="goTo('settings')">
+    <div class="nav-icon">⚙️</div>
+    <div class="nav-label" data-i18n="settings">Settings</div>
+  </div>
+</nav>
+```
+
+  </div>
+
+  <!-- ══════════════════ PLUG CARD ══════════════════ -->
+
+  <div class="screen no-nav" id="screen-plugcard">
+    <div class="topbar">
+      <div class="topbar-logo" onclick="goHome()">PL<span>U</span>G💡</div>
+      <div class="topbar-right" onclick="goTo('settings')">← <span data-i18n="back">Retour</span></div>
+    </div>
+    <div class="screen-body" style="padding-bottom:20px">
+      <div class="plugcard-wrap">
+
+```
+    <div class="visa-card">
+      <div class="visa-chip"></div>
+      <div class="visa-nfc">📶</div>
+      <button class="visa-reveal-btn" onclick="toggleReveal()">
+        <span id="reveal-icon">👁</span>
+        <span id="reveal-text">Voir</span>
+      </button>
+      <div class="visa-number" id="visa-number">•••• •••• •••• 2026</div>
+      <div class="visa-brand">
+        <div class="visa-brand-name">PL<span>U</span>G</div>
+        <div class="visa-brand-tag">Universal Action Card</div>
+      </div>
+      <div class="visa-holder">
+        <div class="visa-holder-label">Titulaire</div>
+        <div class="visa-holder-name" id="visa-holder">RAYAN BENNACER</div>
+      </div>
+      <div class="visa-expiry">
+        <div class="visa-expiry-label">Expire</div>
+        <div class="visa-expiry-val" id="visa-expiry">••/••</div>
+      </div>
+      <div class="visa-cvv">
+        <div class="visa-cvv-label">CVV</div>
+        <div class="visa-cvv-val" id="visa-cvv">•••</div>
+      </div>
+      <div class="visa-accent"></div>
+    </div>
+
+    <div class="balance-box">
+      <div class="balance-lbl" data-i18n="balance">Solde disponible</div>
+      <div class="balance-val" id="balance-display">150€</div>
+      <div class="balance-sub" data-i18n="balance-sub">Carte virtuelle rechargeable</div>
+    </div>
+
+    <div class="recharge-row">
+      <button class="recharge-btn" onclick="recharge(20)">+20€</button>
+      <button class="recharge-btn" onclick="recharge(50)">+50€</button>
+      <button class="recharge-btn" onclick="recharge(100)">+100€</button>
+    </div>
+
+    <div class="cashback-box">
+      <div class="cashback-header">
+        <div class="cashback-title" data-i18n="cashback">Cashback PLUG</div>
+        <div class="cashback-active" data-i18n="active">Actif</div>
+      </div>
+      <div class="cashback-item">
+        <div class="cashback-left">
+          <div class="cashback-emoji">👟</div>
+          <div>
+            <div class="cashback-name">Shopping</div>
+            <div class="cashback-desc" data-i18n="on-purchases">Sur chaque achat</div>
+          </div>
+        </div>
+        <div class="cashback-right">
+          <div class="cashback-pct">3%</div>
+          <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+        </div>
+      </div>
+      <div class="cashback-item">
+        <div class="cashback-left">
+          <div class="cashback-emoji">🍔</div>
+          <div>
+            <div class="cashback-name">Food</div>
+            <div class="cashback-desc" data-i18n="on-purchases">Sur chaque achat</div>
+          </div>
+        </div>
+        <div class="cashback-right">
+          <div class="cashback-pct">5%</div>
+          <label class="toggle"><input type="checkbox" checked><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+        </div>
+      </div>
+      <div class="cashback-item">
+        <div class="cashback-left">
+          <div class="cashback-emoji">🚗</div>
+          <div>
+            <div class="cashback-name">Transport</div>
+            <div class="cashback-desc" data-i18n="on-purchases">Sur chaque achat</div>
+          </div>
+        </div>
+        <div class="cashback-right">
+          <div class="cashback-pct">2%</div>
+          <label class="toggle"><input type="checkbox"><div class="toggle-track"></div><div class="toggle-thumb"></div></label>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+```
+
+  </div>
+
+  <!-- ══════════════════ PROFILE ══════════════════ -->
+
+  <div class="screen no-nav" id="screen-profile">
+    <div class="topbar">
+      <div class="topbar-logo" onclick="goHome()">PL<span>U</span>G💡</div>
+      <div class="topbar-right" onclick="goTo('settings')">← <span data-i18n="back">Retour</span></div>
+    </div>
+    <div class="screen-body" style="padding-bottom:20px">
+      <div class="profile-hero">
+        <div class="profile-avatar">👤</div>
+        <div class="profile-name" id="profile-name-display">RAYAN</div>
+        <div class="profile-email" id="profile-email-display">hello.plugapp@gmail.com</div>
+        <div class="profile-badge">PLUG BETA USER</div>
+      </div>
+      <div class="form-wrap">
+        <div class="form-group">
+          <div class="form-lbl" data-i18n="firstname">Prénom</div>
+          <input class="form-input" id="input-firstname" type="text" value="Rayan" placeholder="Ton prénom">
+        </div>
+        <div class="form-group">
+          <div class="form-lbl" data-i18n="lastname">Nom</div>
+          <input class="form-input" id="input-lastname" type="text" value="Bennacer" placeholder="Ton nom">
+        </div>
+        <div class="form-group">
+          <div class="form-lbl">Email</div>
+          <input class="form-input" id="input-email" type="email" value="hello.plugapp@gmail.com" placeholder="Ton email">
+        </div>
+      </div>
+      <button class="save-btn" onclick="saveProfile()" data-i18n="save">Sauvegarder</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════ ACTION MODAL ══════════════════ -->
+
+  <div class="overlay" id="action-modal">
+    <div class="action-sheet">
+      <div class="sheet-title" data-i18n="how-to-act">Comment veux-tu agir ?</div>
+      <div class="text-input-row" id="text-input-row">
+        <input class="text-input-field" id="text-field" type="text" placeholder="Tape ta commande...">
+        <button class="text-send-btn" onclick="submitText()">➜</button>
+      </div>
+      <div class="action-options">
+        <div class="action-opt" onclick="chooseVoice()">
+          <div class="action-opt-icon">🎤</div>
+          <div class="action-opt-body">
+            <div class="action-opt-title" data-i18n="voice-cmd">Commande vocale</div>
+            <div class="action-opt-sub" data-i18n="voice-sub">Parle à PLUG</div>
+          </div>
+          <div class="action-opt-arrow">›</div>
+        </div>
+        <div class="action-opt" onclick="chooseText()">
+          <div class="action-opt-icon">✏️</div>
+          <div class="action-opt-body">
+            <div class="action-opt-title" data-i18n="text-cmd">Commande écrite</div>
+            <div class="action-opt-sub" data-i18n="text-sub">Tape ta demande</div>
+          </div>
+          <div class="action-opt-arrow">›</div>
+        </div>
+      </div>
+      <div class="sheet-cancel" onclick="closeActionModal()" data-i18n="cancel">Annuler</div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ LANG MODAL ══════════════════ -->
+
+  <div class="overlay" id="lang-modal">
+    <div class="action-sheet">
+      <div class="sheet-title" data-i18n="choose-lang">Choisir la langue</div>
+      <div class="lang-sheet">
+        <div class="lang-opt" id="lang-fr" onclick="setLang('fr')">🇫🇷 Français</div>
+        <div class="lang-opt" id="lang-en" onclick="setLang('en')">🇬🇧 English</div>
+      </div>
+      <div class="sheet-cancel" onclick="closeLangModal()" data-i18n="cancel">Annuler</div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+
+  <div id="toast"></div>
+
+</div>
+<script>
+
+/* ══════════════════════════════════════
+STATE
+══════════════════════════════════════ */
+let lang = ‘fr’;
+let currentModule = ‘shopping’;
+let balance = 150;
+let notifEnabled = true;
+let cardRevealed = false;
+let swipeDragging = false;
+let swipeStartX = 0;
+let swipeCurrentX = 0;
+let swipeTrackW = 0;
+let swipePurchased = false;
+
+const CARD_DATA = { number: ‘4815 1623 4200 2026’, expiry: ‘12/28’, cvv: ‘261’ };
+
+/* ══════════════════════════════════════
+I18N
+══════════════════════════════════════ */
+const T = {
+fr: {
+‘module’:‘Module’,‘shopping’:‘Shopping’,‘transport’:‘Transport’,‘food’:‘Food’,‘agenda’:‘Agenda’,
+‘central-hint’:‘Appuie pour agir’,‘recent’:‘Récent’,‘action’:‘Action’,‘orders’:‘Orders’,‘settings’:‘Settings’,
+‘cancel’:‘Annuler’,‘listening’:“J’écoute…”,‘back’:‘Retour’,‘verified’:‘Vendeur vérifié’,
+‘swipe-label’:‘SWIPE POUR ACHETER →’,‘swipe-hint’:‘Glisse vers la droite pour valider’,
+‘plugged’:‘PLUGGÉ.’,‘product’:‘Produit’,‘source’:‘Source’,‘total’:‘Total’,‘delivery’:‘Livraison’,‘ordered’:‘Commandé’,
+‘new-action’:‘Nouvelle action’,‘my-orders’:‘Mes commandes’,‘delivered’:‘Livré’,‘in-transit’:‘En route’,
+‘settings-title’:‘Paramètres’,‘account’:‘Compte’,‘profile’:‘Profil’,‘plug-card’:‘Carte PLUG’,
+‘preferences’:‘Préférences’,‘language’:‘Langue’,‘notifications’:‘Notifications’,
+‘notif-sub’:‘Commandes et promos’,‘location’:‘Localisation’,‘location-sub’:‘Pour transport et food’,
+‘about’:‘À propos’,‘balance’:‘Solde disponible’,‘balance-sub’:‘Carte virtuelle rechargeable’,
+‘cashback’:‘Cashback PLUG’,‘active’:‘Actif’,‘on-purchases’:‘Sur chaque achat’,
+‘firstname’:‘Prénom’,‘lastname’:‘Nom’,‘save’:‘Sauvegarder’,
+‘how-to-act’:‘Comment veux-tu agir ?’,‘voice-cmd’:‘Commande vocale’,‘voice-sub’:‘Parle à PLUG’,
+‘text-cmd’:‘Commande écrite’,‘text-sub’:‘Tape ta demande’,‘choose-lang’:‘Choisir la langue’,
+‘toast-saved’:‘Profil sauvegardé ✓’,‘toast-notif-on’:‘Notifications activées 🔔’,
+‘toast-notif-off’:‘Notifications désactivées’,‘toast-recharged’:‘Carte rechargée ✓’,
+‘toast-ordered’:‘Commande confirmée 🔔’
+},
+en: {
+‘module’:‘Module’,‘shopping’:‘Shopping’,‘transport’:‘Transport’,‘food’:‘Food’,‘agenda’:‘Agenda’,
+‘central-hint’:‘Tap to act’,‘recent’:‘Recent’,‘action’:‘Action’,‘orders’:‘Orders’,‘settings’:‘Settings’,
+‘cancel’:‘Cancel’,‘listening’:‘Listening…’,‘back’:‘Back’,‘verified’:‘Verified seller’,
+‘swipe-label’:‘SWIPE TO BUY →’,‘swipe-hint’:‘Slide right to confirm’,
+‘plugged’:‘PLUGGED.’,‘product’:‘Product’,‘source’:‘Source’,‘total’:‘Total’,‘delivery’:‘Delivery’,‘ordered’:‘Ordered’,
+‘new-action’:‘New action’,‘my-orders’:‘My orders’,‘delivered’:‘Delivered’,‘in-transit’:‘In transit’,
+‘settings-title’:‘Settings’,‘account’:‘Account’,‘profile’:‘Profile’,‘plug-card’:‘PLUG Card’,
+‘preferences’:‘Preferences’,‘language’:‘Language’,‘notifications’:‘Notifications’,
+‘notif-sub’:‘Orders and promos’,‘location’:‘Location’,‘location-sub’:‘For transport and food’,
+‘about’:‘About’,‘balance’:‘Available balance’,‘balance-sub’:‘Rechargeable virtual card’,
+‘cashback’:‘PLUG Cashback’,‘active’:‘Active’,‘on-purchases’:‘On every purchase’,
+‘firstname’:‘First name’,‘lastname’:‘Last name’,‘save’:‘Save’,
+‘how-to-act’:‘How do you want to act?’,‘voice-cmd’:‘Voice command’,‘voice-sub’:‘Speak to PLUG’,
+‘text-cmd’:‘Text command’,‘text-sub’:‘Type your request’,‘choose-lang’:‘Choose language’,
+‘toast-saved’:‘Profile saved ✓’,‘toast-notif-on’:‘Notifications enabled 🔔’,
+‘toast-notif-off’:‘Notifications disabled’,‘toast-recharged’:‘Card recharged ✓’,
+‘toast-ordered’:‘Order confirmed 🔔’
+}
+};
+
+function t(key) { return (T[lang] && T[lang][key]) || T.fr[key] || key; }
+
+function applyLang() {
+document.querySelectorAll(’[data-i18n]’).forEach(el => {
+const key = el.getAttribute(‘data-i18n’);
+el.textContent = t(key);
+});
+document.getElementById(‘text-field’).placeholder = lang === ‘en’ ? ‘Type your command…’ : ‘Tape ta commande…’;
+document.getElementById(‘lang-sub’).textContent = lang === ‘fr’ ? ‘Français’ : ‘English’;
+document.getElementById(‘lang-fr’).classList.toggle(‘selected’, lang === ‘fr’);
+document.getElementById(‘lang-en’).classList.toggle(‘selected’, lang === ‘en’);
+}
+
+/* ══════════════════════════════════════
+MODULE DATA
+══════════════════════════════════════ */
+const MODULES = {
+shopping: {
+steps: [‘Analyse de la commande…’,‘Scan Nike + Vinted + Amazon’,‘Vérification vendeurs ⭐ 4.5+’,‘Meilleur deal trouvé ✓’],
+steps_en: [‘Analyzing command…’,‘Scanning Nike + Vinted + Amazon’,‘Checking sellers ⭐ 4.5+’,‘Best deal found ✓’],
+voice_cmd: ‘“Chope moi des Air Max noires taille 44”’,
+voice_cmd_en: ‘“Get me black Air Max size 44”’,
+msg: “Voilà ta pépite. Meilleur prix du marché, vendeur béton. Swipe si t’es chaud.”,
+msg_en: “Here’s your deal. Best market price, trusted seller. Swipe to confirm.”,
+name: ‘Air Max’, sub: ‘Noir · Taille 44 · En stock’, sub_en: ‘Black · Size 44 · In stock’,
+source: ‘NIKE’, old_price: ‘129€’, price: ‘99€’, discount: ‘-23%’,
+bg: ‘’, illustration: ‘sneaker’,
+confirm_product: ‘Air Max Noir 44’, confirm_source: ‘Nike.com’, confirm_price: ‘99€’,
+confirm_sub: ‘Confirmation envoyée.<br>Tes sneakers sont en route.’,
+confirm_sub_en: ‘Confirmation sent.<br>Your sneakers are on the way.’,
+confirm_msg: “C’est dans la boîte. Je te notifie dès que ça part.”,
+confirm_msg_en: “Done. I’ll notify you when it ships.”
+},
+transport: {
+steps: [‘Localisation détectée…’,‘Scan Uber + Bolt + Heetch’,‘Meilleur chauffeur proche ✓’,‘ETA calculé — 3 min’],
+steps_en: [‘Location detected…’,‘Scanning Uber + Bolt + Heetch’,‘Best nearby driver ✓’,‘ETA calculated — 3 min’],
+voice_cmd: ‘“Ramène moi chez moi”’,
+voice_cmd_en: ‘“Take me home”’,
+msg: “Chauffeur à 3 min. 4.9 étoiles, 847 courses. Swipe pour confirmer.”,
+msg_en: “Driver 3 min away. 4.9 stars, 847 rides. Swipe to confirm.”,
+name: ‘Uber X’, sub: ‘Chauffeur · Paris 9e · 3 min’, sub_en: ‘Driver · Paris 9e · 3 min’,
+source: ‘UBER’, old_price: ‘18€’, price: ‘14€’, discount: ‘-22%’,
+bg: ‘bg-transport’, illustration: ‘car’,
+confirm_product: ‘Uber X — Chez moi’, confirm_source: ‘Uber’, confirm_price: ‘14€’,
+confirm_sub: ‘Chauffeur confirmé.<br>Il arrive dans 3 minutes.’,
+confirm_sub_en: ‘Driver confirmed.<br>Arriving in 3 minutes.’,
+confirm_msg: “Ton chauffeur est en route.”,
+confirm_msg_en: “Your driver is on the way.”
+},
+food: {
+steps: [‘Analyse de la commande…’,‘Scan Deliveroo + Uber Eats’,‘Vérification resto ⭐ 4.5+’,‘Meilleur deal trouvé ✓’],
+steps_en: [‘Analyzing command…’,‘Scanning Deliveroo + Uber Eats’,‘Checking restaurant ⭐ 4.5+’,‘Best deal found ✓’],
+voice_cmd: ‘“Commande moi un burger”’,
+voice_cmd_en: ‘“Order me a burger”’,
+msg: “4.7 étoiles, 22 min. Le meilleur dans ton secteur. Swipe.”,
+msg_en: “4.7 stars, 22 min. Best in your area. Swipe.”,
+name: ‘Smash Burger’, sub: ‘Big Smoke · Livraison 22 min’, sub_en: ‘Big Smoke · Delivery 22 min’,
+source: ‘DELIVEROO’, old_price: ‘16€’, price: ‘12€’, discount: ‘-25%’,
+bg: ‘bg-food’, illustration: ‘burger’,
+confirm_product: ‘Smash Burger x1’, confirm_source: ‘Deliveroo’, confirm_price: ‘12€’,
+confirm_sub: ‘Commande envoyée.<br>Livraison estimée 22 min.’,
+confirm_sub_en: ‘Order sent.<br>Estimated delivery 22 min.’,
+confirm_msg: “Le resto a confirmé. En route vers toi.”,
+confirm_msg_en: “Restaurant confirmed. On its way.”
+},
+agenda: {
+steps: [‘Analyse du créneau…’,‘Vérification agenda Google’,‘Aucun conflit détecté ✓’,‘Événement créé’],
+steps_en: [‘Analyzing slot…’,‘Checking Google Calendar’,‘No conflicts ✓’,‘Event created’],
+voice_cmd: ‘“Bloque moi jeudi à 15h”’,
+voice_cmd_en: ‘“Block Thursday at 3pm”’,
+msg: “Créneau bloqué. Rappel 30 min avant activé.”,
+msg_en: “Slot blocked. 30 min reminder set.”,
+name: ‘Rendez-vous’, sub: ‘Jeudi 15:00 · 1 heure’, sub_en: ‘Thursday 15:00 · 1 hour’,
+source: ‘AGENDA’, old_price: ‘’, price: ‘Ajouté’, discount: ‘✓ OK’,
+bg: ‘bg-agenda’, illustration: ‘calendar’,
+confirm_product: ‘RDV Jeudi 15h’, confirm_source: ‘Google Calendar’, confirm_price: ‘Confirmé’,
+confirm_sub: ‘Créneau bloqué.<br>Rappel 30 min avant activé.’,
+confirm_sub_en: ‘Slot blocked.<br>30 min reminder activated.’,
+confirm_msg: “C’est dans ton agenda.”,
+confirm_msg_en: “Added to your calendar.”
+}
+};
+
+/* ══════════════════════════════════════
+ILLUSTRATIONS
+══════════════════════════════════════ */
+const ILLUSTRATIONS = {
+sneaker: `<svg style="width:190px;height:130px;animation:float 3s ease-in-out infinite" viewBox="0 0 200 140" fill="none"> <ellipse cx="100" cy="116" rx="82" ry="11" fill="#111"/> <path d="M22 100 Q27 72 62 67 Q92 62 132 70 Q162 76 176 87 Q181 93 179 100Z" fill="#e8e8e8"/> <path d="M32 95 Q37 74 67 70 Q97 66 127 72 Q152 78 170 90" stroke="#d0d0d0" stroke-width="2" fill="none"/> <path d="M47 89 Q82 73 132 79 Q157 83 170 91" stroke="#d4ff00" stroke-width="4" fill="none" stroke-linecap="round"/> <path d="M22 100 Q20 92 24 87 Q32 79 52 77 Q37 89 32 95Z" fill="#ddd"/> <path d="M57 75 Q77 71 97 72 L95 79 Q75 78 57 82Z" fill="#ccc"/> <line x1="64" y1="75" x2="64" y2="82" stroke="#bbb" stroke-width="1.5"/> <line x1="74" y1="73" x2="73" y2="80" stroke="#bbb" stroke-width="1.5"/> <line x1="84" y1="72" x2="83" y2="79" stroke="#bbb" stroke-width="1.5"/> <path d="M157 81 Q173 81 179 91 Q181 97 179 100 L157 100Z" fill="#e0e0e0"/> <path d="M22 100 L179 100 Q183 105 181 109 Q101 113 22 109Z" fill="#f5f5f5"/> <path d="M24 109 Q101 115 179 109 Q181 115 179 119 Q101 125 24 119Z" fill="#222"/> <text x="132" y="98" font-size="8" fill="#aaa" font-family="Arial" font-weight="bold">NIKE</text> </svg>`,
+car: `<svg style="width:190px;height:130px;animation:float 3s ease-in-out infinite" viewBox="0 0 200 140" fill="none"> <ellipse cx="100" cy="118" rx="72" ry="8" fill="#0a0a0a"/> <rect x="32" y="76" width="136" height="40" rx="11" fill="#1a1a2e"/> <path d="M47 76 Q57 54 77 52 L123 52 Q143 54 153 76Z" fill="#16213e"/> <rect x="52" y="57" width="33" height="20" rx="4" fill="#d4ff00" opacity="0.12"/> <rect x="115" y="57" width="33" height="20" rx="4" fill="#d4ff00" opacity="0.12"/> <circle cx="67" cy="116" r="11" fill="#111" stroke="#2a2a2a" stroke-width="2"/> <circle cx="67" cy="116" r="5" fill="#1a1a1a"/> <circle cx="133" cy="116" r="11" fill="#111" stroke="#2a2a2a" stroke-width="2"/> <circle cx="133" cy="116" r="5" fill="#1a1a1a"/> <rect x="32" y="89" width="8" height="14" rx="2" fill="#d4ff00" opacity="0.85"/> <rect x="160" y="89" width="8" height="14" rx="2" fill="#ff4444" opacity="0.85"/> <line x1="32" y1="96" x2="168" y2="96" stroke="#2a2a2a" stroke-width="1"/> <text x="76" y="73" font-size="9" fill="#d4ff00" font-family="Arial" font-weight="bold" text-anchor="middle">UBER X</text> </svg>`,
+burger: `<svg style="width:190px;height:130px;animation:float 3s ease-in-out infinite" viewBox="0 0 200 140" fill="none"> <ellipse cx="100" cy="118" rx="52" ry="7" fill="#0a0a0a"/> <ellipse cx="100" cy="99" rx="50" ry="11" fill="#8B4513"/> <ellipse cx="100" cy="94" rx="48" ry="9" fill="#A0522D"/> <ellipse cx="100" cy="87" rx="46" ry="8" fill="#228B22" opacity="0.9"/> <ellipse cx="100" cy="82" rx="44" ry="7" fill="#DC143C" opacity="0.9"/> <ellipse cx="100" cy="76" rx="42" ry="7" fill="#F5DEB3"/> <ellipse cx="100" cy="70" rx="44" ry="8" fill="#DAA520"/> <ellipse cx="100" cy="64" rx="48" ry="9" fill="#CD853F"/> <path d="M62 64 Q100 52 138 64" stroke="#d4ff00" stroke-width="2" fill="none" opacity="0.35"/> <ellipse cx="100" cy="62" rx="48" ry="7" fill="#8B4513"/> </svg>`,
+calendar: `<svg style="width:160px;height:130px;animation:float 3s ease-in-out infinite" viewBox="0 0 160 140" fill="none"> <rect x="20" y="28" width="120" height="96" rx="12" fill="#1a1a2e" stroke="#2a2a2a" stroke-width="1"/> <rect x="20" y="28" width="120" height="26" rx="12" fill="#d4ff00"/> <rect x="20" y="42" width="120" height="12" fill="#d4ff00"/> <text x="80" y="46" font-size="11" fill="#000" font-family="Arial" font-weight="bold" text-anchor="middle">JEUDI 15:00</text> <line x1="20" y1="68" x2="140" y2="68" stroke="#2a2a2a" stroke-width="1"/> <rect x="28" y="76" width="22" height="20" rx="5" fill="#d4ff00" opacity="0.08"/> <rect x="58" y="76" width="22" height="20" rx="5" fill="#d4ff00" opacity="0.08"/> <rect x="88" y="76" width="22" height="20" rx="5" fill="#d4ff00" opacity="0.08"/> <rect x="118" y="76" width="22" height="20" rx="5" fill="#d4ff00" opacity="0.08"/> <rect x="28" y="104" width="22" height="20" rx="5" fill="#d4ff00" opacity="0.08"/> <rect x="58" y="104" width="22" height="20" rx="5" fill="#d4ff00"/> <text x="69" y="118" font-size="11" fill="#000" font-family="Arial" font-weight="bold" text-anchor="middle">15</text> <rect x="88" y="104" width="22" height="20" rx="5" fill="#d4ff00" opacity="0.08"/> <rect x="118" y="104" width="22" height="20" rx="5" fill="#d4ff00" opacity="0.08"/> </svg>`
+};
+
+/* ══════════════════════════════════════
+NAVIGATION
+══════════════════════════════════════ */
+function showScreen(id) {
+document.querySelectorAll(’.screen’).forEach(s => s.classList.remove(‘active’));
+const el = document.getElementById(‘screen-’ + id);
+if (el) el.classList.add(‘active’);
+}
+
+function goTo(id) {
+// Update nav active states
+document.querySelectorAll(’.nav-item’).forEach(n => n.classList.remove(‘active’));
+document.querySelectorAll(’.nav-item’).forEach(n => {
+const lbl = n.querySelector(’.nav-label’);
+if (lbl) {
+const key = lbl.getAttribute(‘data-i18n’);
+if ((id === ‘home’ && key === ‘action’) ||
+(id === ‘orders’ && key === ‘orders’) ||
+(id === ‘settings’ && key === ‘settings’)) {
+n.classList.add(‘active’);
+}
+}
+});
+showScreen(id);
+}
+
+function goHome() {
+resetProductCard();
+resetSwipe();
+goTo(‘home’);
+}
+
+/* ══════════════════════════════════════
+MODULE START
+══════════════════════════════════════ */
+function startModule(mod) {
+currentModule = mod;
+const m = MODULES[mod];
+const cmd = lang === ‘en’ ? m.voice_cmd_en : m.voice_cmd;
+runListening(cmd);
+}
+
+function runListening(transcript) {
+showScreen(‘listening’);
+const el = document.getElementById(‘transcript-text’);
+el.textContent = ‘’;
+el.classList.remove(‘show’);
+setTimeout(() => {
+el.textContent = transcript;
+el.classList.add(‘show’);
+}, 1100);
+setTimeout(() => runProcessing(), 2800);
+}
+
+function runProcessing() {
+showScreen(‘processing’);
+const m = MODULES[currentModule];
+const steps = lang === ‘en’ ? m.steps_en : m.steps;
+[‘ps1t’,‘ps2t’,‘ps3t’,‘ps4t’].forEach((id, i) => {
+const el = document.getElementById(id);
+if (el && steps[i]) el.textContent = steps[i];
+});
+[‘ps1’,‘ps2’,‘ps3’,‘ps4’].forEach((id, i) => {
+const el = document.getElementById(id);
+if (el) {
+el.classList.remove(‘done’);
+setTimeout(() => el.classList.add(‘done’), i * 700 + 200);
+}
+});
+setTimeout(() => showCard(), 3200);
+}
+
+function showCard(customName, customSub, customMsg) {
+const m = MODULES[currentModule];
+const name = customName || m.name;
+const sub = customSub || (lang === ‘en’ ? m.sub_en : m.sub);
+const msg = customMsg || (lang === ‘en’ ? m.msg_en : m.msg);
+
+document.getElementById(‘card-msg’).textContent = msg;
+document.getElementById(‘card-name’).textContent = name;
+document.getElementById(‘card-sub’).textContent = sub;
+document.getElementById(‘card-source’).textContent = m.source;
+document.getElementById(‘card-old-price’).textContent = m.old_price;
+document.getElementById(‘card-price’).textContent = m.price;
+document.getElementById(‘card-discount’).textContent = m.discount;
+
+// Illustration
+const zone = document.getElementById(‘card-img-zone’);
+zone.className = ‘card-img-zone’ + (m.bg ? ’ ’ + m.bg : ‘’);
+document.getElementById(‘card-illustration’).innerHTML = ILLUSTRATIONS[m.illustration] || ‘’;
+
+// Reset swipe
+resetProductCard();
+resetSwipe();
+swipePurchased = false;
+
+showScreen(‘card’);
+initSwipe();
+}
+
+/* ══════════════════════════════════════
+TEXT COMMAND
+══════════════════════════════════════ */
+function detectModule(text) {
+const l = text.toLowerCase();
+if (l.match(/uber|taxi|voiture|transport|vtc|ride|car|chauffeur/)) return ‘transport’;
+if (l.match(/burger|pizza|sushi|manger|nourriture|food|eat|resto|livr|plat|repas/)) return ‘food’;
+if (l.match(/rdv|rendez|agenda|cal|bloque|réunion|meeting|créneau|jeudi|lundi|mardi|mercredi|vendredi/)) return ‘agenda’;
+return ‘shopping’;
+}
+
+function extractInfo(text) {
+const l = text.toLowerCase();
+const sizeMatch = l.match(/taille\s*(\d+)|size\s*(\d+)/);
+const size = sizeMatch ? (sizeMatch[1] || sizeMatch[2]) : null;
+const colorMap = {‘noir’:‘Noir’,‘noire’:‘Noir’,‘black’:‘Noir’,‘blanc’:‘Blanc’,‘blanche’:‘Blanc’,‘white’:‘Blanc’,‘rouge’:‘Rouge’,‘red’:‘Rouge’,‘bleu’:‘Bleu’,‘bleue’:‘Bleu’,‘blue’:‘Bleu’,‘gris’:‘Gris’,‘gray’:‘Gris’,‘grey’:‘Gris’,‘vert’:‘Vert’,‘verte’:‘Vert’,‘green’:‘Vert’};
+let color = null;
+for (const [k,v] of Object.entries(colorMap)) { if (l.includes(k)) { color = v; break; } }
+let model = text
+.replace(/chope[\s-]?moi|trouve[\s-]?moi|achète[\s-]?moi|commande[\s-]?moi|get[\s-]?me|find[\s-]?me|order[\s-]?me/gi, ‘’)
+.replace(/taille\s*\d+|size\s*\d+/gi, ‘’)
+.replace(/noir(e)?|blanc(he)?|rouge|bleu(e)?|gris(e)?|vert(e)?|black|white|red|blue|gray|grey|green/gi, ‘’)
+.replace(/\b(des|une|un|les|the|a|an)\b/gi, ‘’)
+.replace(/\s+/g, ’ ‘).trim();
+model = model.split(’ ‘).filter(w => w.length > 1).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(’ ’);
+if (!model || model.length < 2) model = null;
+return { model, color, size };
+}
+
+function submitText() {
+const field = document.getElementById(‘text-field’);
+const text = field.value.trim();
+if (!text) return;
+
+closeActionModal();
+field.value = ‘’;
+
+currentModule = detectModule(text);
+const m = MODULES[currentModule];
+
+let customName = null;
+let customSub = null;
+let customMsg = lang === ‘en’
+? ‘Best deal found for your request. Swipe to confirm.’
+: ‘Meilleur deal trouvé pour ta demande. Swipe pour confirmer.’;
+
+if (currentModule === ‘shopping’) {
+const info = extractInfo(text);
+if (info.model) customName = info.model;
+let parts = [];
+if (info.color) parts.push(info.color);
+if (info.size) parts.push(‘Taille ’ + info.size);
+parts.push(‘En stock’);
+customSub = parts.join(’ · ’);
+}
+
+// Store for after processing
+window._pendingCard = { customName, customSub, customMsg };
+
+runListening(’”’ + text + ‘”’);
+}
+
+/* Override runProcessing to use pending card data */
+const _origRunProcessing = runProcessing;
+function runProcessing() {
+showScreen(‘processing’);
+const m = MODULES[currentModule];
+const steps = lang === ‘en’ ? m.steps_en : m.steps;
+[‘ps1t’,‘ps2t’,‘ps3t’,‘ps4t’].forEach((id, i) => {
+const el = document.getElementById(id);
+if (el && steps[i]) el.textContent = steps[i];
+});
+[‘ps1’,‘ps2’,‘ps3’,‘ps4’].forEach((id, i) => {
+const el = document.getElementById(id);
+if (el) {
+el.classList.remove(‘done’);
+setTimeout(() => el.classList.add(‘done’), i * 700 + 200);
+}
+});
+setTimeout(() => {
+const pending = window._pendingCard;
+window._pendingCard = null;
+showCard(pending ? pending.customName : null, pending ? pending.customSub : null, pending ? pending.customMsg : null);
+}, 3200);
+}
+
+/* ══════════════════════════════════════
+SWIPE
+══════════════════════════════════════ */
+function initSwipe() {
+const thumb = document.getElementById(‘swipe-thumb’);
+const track = document.getElementById(‘swipe-track’);
+
+// Clone thumb to remove old listeners
+const newThumb = thumb.cloneNode(true);
+thumb.parentNode.replaceChild(newThumb, thumb);
+
+swipePurchased = false;
+swipeDragging = false;
+swipeCurrentX = 0;
+swipeTrackW = 0;
+
+newThumb.addEventListener(‘touchstart’, onSwipeStart, { passive: false });
+newThumb.addEventListener(‘mousedown’, onSwipeStart, { passive: false });
+document.addEventListener(‘touchmove’, onSwipeMove, { passive: false });
+document.addEventListener(‘mousemove’, onSwipeMove, { passive: false });
+document.addEventListener(‘touchend’, onSwipeEnd);
+document.addEventListener(‘mouseup’, onSwipeEnd);
+}
+
+function onSwipeStart(e) {
+if (swipePurchased) return;
+e.preventDefault();
+swipeDragging = true;
+const track = document.getElementById(‘swipe-track’);
+swipeTrackW = track.getBoundingClientRect().width;
+swipeStartX = e.touches ? e.touches[0].clientX : e.clientX;
+swipeCurrentX = 0;
+}
+
+function onSwipeMove(e) {
+if (!swipeDragging || swipePurchased) return;
+e.preventDefault();
+const x = e.touches ? e.touches[0].clientX : e.clientX;
+const delta = Math.max(0, Math.min(x - swipeStartX, swipeTrackW - 62));
+swipeCurrentX = delta;
+const thumb = document.getElementById(‘swipe-thumb’);
+const fill = document.getElementById(‘swipe-fill’);
+if (thumb) { thumb.style.transition = ‘none’; thumb.style.left = (7 + delta) + ‘px’; }
+if (fill) fill.style.width = (delta / Math.max(swipeTrackW - 62, 1) * 100) + ‘%’;
+if (delta >= swipeTrackW * 0.65) {
+swipeDragging = false;
+doPurchase();
+}
+}
+
+function onSwipeEnd() {
+if (!swipeDragging) return;
+swipeDragging = false;
+if (swipeCurrentX < swipeTrackW * 0.65) resetSwipe();
+}
+
+function resetSwipe() {
+swipeCurrentX = 0;
+const thumb = document.getElementById(‘swipe-thumb’);
+const fill = document.getElementById(‘swipe-fill’);
+if (thumb) { thumb.style.transition = ‘left 0.3s ease’; thumb.style.left = ‘7px’; }
+if (fill) { fill.style.transition = ‘width 0.3s ease’; fill.style.width = ‘0%’; }
+setTimeout(() => {
+if (thumb) thumb.style.transition = ‘none’;
+if (fill) fill.style.transition = ‘none’;
+}, 300);
+}
+
+function doPurchase() {
+if (swipePurchased) return;
+swipePurchased = true;
+
+// Animate thumb to end
+const track = document.getElementById(‘swipe-track’);
+const thumb = document.getElementById(‘swipe-thumb’);
+const fill = document.getElementById(‘swipe-fill’);
+const w = (track ? track.getBoundingClientRect().width : swipeTrackW) || swipeTrackW;
+if (thumb) { thumb.style.transition = ‘left 0.2s ease’; thumb.style.left = (w - 55) + ‘px’; }
+if (fill) { fill.style.transition = ‘width 0.2s ease’; fill.style.width = ‘100%’; }
+
+setTimeout(() => {
+const card = document.getElementById(‘product-card’);
+if (card) card.classList.add(‘swiped’);
+addOrder();
+debitBalance();
+}, 200);
+
+setTimeout(() => {
+const m = MODULES[currentModule];
+document.getElementById(‘confirm-product’).textContent = m.confirm_product;
+document.getElementById(‘confirm-source’).textContent = m.confirm_source;
+document.getElementById(‘confirm-price’).textContent = m.confirm_price;
+document.getElementById(‘confirm-sub’).innerHTML = lang === ‘en’ ? (m.confirm_sub_en || m.confirm_sub) : m.confirm_sub;
+document.getElementById(‘confirm-msg’).textContent = lang === ‘en’ ? (m.confirm_msg_en || m.confirm_msg) : m.confirm_msg;
+showScreen(‘confirmed’);
+if (notifEnabled) {
+setTimeout(() => showToast(t(‘toast-ordered’)), 800);
+}
+}, 650);
+}
+
+function resetProductCard() {
+const card = document.getElementById(‘product-card’);
+if (card) card.classList.remove(‘swiped’);
+}
+
+/* ══════════════════════════════════════
+ORDERS
+══════════════════════════════════════ */
+function addOrder() {
+const m = MODULES[currentModule];
+const icons = { shopping: ‘👟’, transport: ‘🚗’, food: ‘🍔’, agenda: ‘📅’ };
+const now = new Date();
+const date = now.toLocaleDateString(‘fr-FR’, { day: ‘numeric’, month: ‘long’ });
+const html = `<div class="order-card">
+<div class="order-icon">${icons[currentModule]}</div>
+<div class="order-info">
+<div class="order-name">${m.name}</div>
+<div class="order-meta">${m.confirm_source} · ${date} 2026</div>
+</div>
+<div class="order-right">
+<div class="order-price">${m.price}</div>
+<div class="order-status status-transit">${t(‘in-transit’)}</div>
+</div>
+
+  </div>`;
+  const list = document.getElementById('orders-list');
+  if (list) list.insertAdjacentHTML('afterbegin', html);
+}
+
+function debitBalance() {
+const m = MODULES[currentModule];
+const amount = parseInt((m.price || ‘’).replace(/[^\d]/g, ‘’));
+if (amount && !isNaN(amount)) {
+balance = Math.max(0, balance - amount);
+updateBalanceDisplay();
+}
+}
+
+function updateBalanceDisplay() {
+const el = document.getElementById(‘balance-display’);
+const lbl = document.getElementById(‘card-balance-label’);
+if (el) el.textContent = balance + ‘€’;
+if (lbl) lbl.textContent = (lang === ‘en’ ? ’Balance: ’ : ’Solde : ’) + balance + ‘€’;
+}
+
+/* ══════════════════════════════════════
+PROFILE
+══════════════════════════════════════ */
+function saveProfile() {
+const fn = document.getElementById(‘input-firstname’).value.trim();
+const ln = document.getElementById(‘input-lastname’).value.trim();
+const em = document.getElementById(‘input-email’).value.trim();
+const full = (fn + ’ ’ + ln).trim();
+document.getElementById(‘profile-name-display’).textContent = fn.toUpperCase();
+document.getElementById(‘profile-email-display’).textContent = em;
+document.getElementById(‘profile-sub-label’).textContent = full;
+document.getElementById(‘visa-holder’).textContent = full.toUpperCase();
+showToast(t(‘toast-saved’));
+}
+
+/* ══════════════════════════════════════
+CARD REVEAL
+══════════════════════════════════════ */
+let revealTimer = null;
+
+function toggleReveal() {
+cardRevealed = !cardRevealed;
+const numEl = document.getElementById(‘visa-number’);
+const expEl = document.getElementById(‘visa-expiry’);
+const cvvEl = document.getElementById(‘visa-cvv’);
+const iconEl = document.getElementById(‘reveal-icon’);
+const textEl = document.getElementById(‘reveal-text’);
+
+if (cardRevealed) {
+numEl.textContent = CARD_DATA.number;
+expEl.textContent = CARD_DATA.expiry;
+cvvEl.textContent = CARD_DATA.cvv;
+iconEl.textContent = ‘🙈’;
+textEl.textContent = lang === ‘en’ ? ‘Hide’ : ‘Cacher’;
+showToast(’🔓 ’ + (lang === ‘en’ ? ‘Card revealed’ : ‘Carte révélée’));
+clearTimeout(revealTimer);
+revealTimer = setTimeout(() => { if (cardRevealed) toggleReveal(); }, 15000);
+} else {
+numEl.textContent = ‘•••• •••• •••• 2026’;
+expEl.textContent = ‘••/••’;
+cvvEl.textContent = ‘•••’;
+iconEl.textContent = ‘👁’;
+textEl.textContent = lang === ‘en’ ? ‘Show’ : ‘Voir’;
+clearTimeout(revealTimer);
+}
+}
+
+/* ══════════════════════════════════════
+RECHARGE
+══════════════════════════════════════ */
+function recharge(amount) {
+balance += amount;
+updateBalanceDisplay();
+showToast(t(‘toast-recharged’) + ’ (+’ + amount + ‘€)’);
+}
+
+/* ══════════════════════════════════════
+NOTIFICATIONS
+══════════════════════════════════════ */
+function onToggleNotif(cb) {
+notifEnabled = cb.checked;
+showToast(notifEnabled ? t(‘toast-notif-on’) : t(‘toast-notif-off’));
+}
+
+/* ══════════════════════════════════════
+ACTION MODAL
+══════════════════════════════════════ */
+function openActionModal() {
+document.getElementById(‘text-input-row’).classList.remove(‘show’);
+document.getElementById(‘text-field’).value = ‘’;
+document.getElementById(‘action-modal’).classList.add(‘show’);
+}
+function closeActionModal() {
+document.getElementById(‘action-modal’).classList.remove(‘show’);
+}
+function chooseVoice() {
+closeActionModal();
+startModule(currentModule || ‘shopping’);
+}
+function chooseText() {
+document.getElementById(‘text-input-row’).classList.add(‘show’);
+setTimeout(() => document.getElementById(‘text-field’).focus(), 100);
+}
+
+/* ══════════════════════════════════════
+LANG MODAL
+══════════════════════════════════════ */
+function openLangModal() {
+document.getElementById(‘lang-modal’).classList.add(‘show’);
+}
+function closeLangModal() {
+document.getElementById(‘lang-modal’).classList.remove(‘show’);
+}
+function setLang(l) {
+lang = l;
+applyLang();
+closeLangModal();
+showToast(l === ‘fr’ ? ‘🇫🇷 Langue : Français’ : ‘🇬🇧 Language: English’);
+}
+
+/* ══════════════════════════════════════
+TOAST
+══════════════════════════════════════ */
+let toastTimer = null;
+function showToast(msg) {
+const el = document.getElementById(‘toast’);
+el.textContent = msg;
+el.classList.add(‘show’);
+clearTimeout(toastTimer);
+toastTimer = setTimeout(() => el.classList.remove(‘show’), 2500);
+}
+
+/* ══════════════════════════════════════
+INIT
+══════════════════════════════════════ */
+applyLang();
+goTo(‘home’);
+
+</script>
+</body>
+</html>
